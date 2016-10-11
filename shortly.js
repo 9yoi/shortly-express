@@ -43,7 +43,7 @@ app.get('/create', checkUser, function(req, res) {
   res.render('index');
 });
 
-app.get('/links', function(req, res) {
+app.get('/links', checkUser, function(req, res) {
   Links.reset().fetch().then(function(links) {
     res.status(200).send(links.models);
   });
@@ -102,6 +102,18 @@ app.post('/signup', function(req, res) {
   });
 });
 
+// come back and encrypt later
+app.post('/login', function(req, res) {
+  new User({ username: req.body.username, password: req.body.password}).fetch().then(function(found) {
+    if (found) {
+      req.session.active = true;
+      res.redirect('/');
+    } else {
+      res.status(301);
+      res.redirect('/login');
+    }
+  });
+});
 /************************************************************/
 // Write your authentication routes here
 /************************************************************/

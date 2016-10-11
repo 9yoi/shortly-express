@@ -6,8 +6,7 @@ var Users = require('../app/collections/users');
 var User = require('../app/models/user');
 var Links = require('../app/collections/links');
 var Link = require('../app/models/link');
-var session = require('express-session');
-
+var session = require ('express-session');
 /************************************************************/
 // Mocha doesn't have a way to designate pending before blocks.
 // Mimic the behavior of xit and xdescribe with xbeforeEach.
@@ -159,15 +158,20 @@ describe('', function() {
       var link;
 
       beforeEach(function(done) {
+        new User({
+          'username': 'Phillip',
+          'password': 'Phillip'
+        }).save().then(function() {
+          link = new Link({
+            url: 'http://roflzoo.com/',
+            title: 'Funny pictures of animals, funny dog pictures',
+            baseUrl: 'http://127.0.0.1:4568'
+          });
+          link.save().then(function() {
+            done();
+          });
+        });
         // save a link to the database
-        link = new Link({
-          url: 'http://roflzoo.com/',
-          title: 'Funny pictures of animals, funny dog pictures',
-          baseUrl: 'http://127.0.0.1:4568'
-        });
-        link.save().then(function() {
-          done();
-        });
       });
 
       it('Returns the same shortened code', function(done) {
@@ -201,15 +205,27 @@ describe('', function() {
       });
 
       it('Returns all of the links to display on the links page', function(done) {
+
         var options = {
-          'method': 'GET',
-          'uri': 'http://127.0.0.1:4568/links'
+          'method': 'POST',
+          'uri': 'http://127.0.0.1:4568/login',
+          'json': {
+            'username': 'Phillip',
+            'password': 'Phillip'
+          }
         };
 
         requestWithSession(options, function(error, res, body) {
-          expect(body).to.include('"title":"Funny pictures of animals, funny dog pictures"');
-          expect(body).to.include('"code":"' + link.get('code') + '"');
-          done();
+          var options = {
+            'method': 'GET',
+            'uri': 'http://127.0.0.1:4568/links'
+          };
+
+          requestWithSession(options, function(error, res, body) {
+            expect(body).to.include('"title":"Funny pictures of animals, funny dog pictures"');
+            expect(body).to.include('"code":"' + link.get('code') + '"');
+            done();
+          });
         });
       });
 
@@ -233,10 +249,10 @@ describe('', function() {
       });
     });
 
-    xit('Redirects to login page if a user tries to see all of the links and is not signed in', function(done) {
+    it('Redirects to login page if a user tries to see all of the links and is not signed in', function(done) {
       request('http://127.0.0.1:4568/links', function(error, res, body) {
         expect(res.req.path).to.equal('/login');
-        done();
+        done();          
       });
     });
 
@@ -290,7 +306,7 @@ describe('', function() {
 
   }); // 'Account Creation'
 
-  xdescribe('Account Login:', function() {
+  describe('Account Login:', function() {
 
     var requestWithSession = request.defaults({jar: true});
 
