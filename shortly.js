@@ -49,6 +49,10 @@ app.get('/links', function(req, res) {
   });
 });
 
+app.get('/signup', function(req, res) {
+  res.render('signup');
+});
+
 app.post('/links', function(req, res) {
   var uri = req.body.url; //the url that user types in
 
@@ -79,6 +83,24 @@ app.post('/links', function(req, res) {
   });
 });
 
+app.post('/signup', function(req, res) {
+  new User({ username: req.body.username, password: req.body.password}).fetch().then(function(found) {
+    if (found) {
+      res.redirect('/login');
+    } else {
+      Users.create({
+        username: req.body.username,
+        password: req.body.password
+      })
+      .then(function(newUser) {
+        res.status(200);
+        req.session.active = true;
+        res.redirect('/');
+        //res.send(newUser); // this sends the object created to user
+      });
+    }
+  });
+});
 
 /************************************************************/
 // Write your authentication routes here
