@@ -6,6 +6,7 @@ var Users = require('../app/collections/users');
 var User = require('../app/models/user');
 var Links = require('../app/collections/links');
 var Link = require('../app/models/link');
+var session = require('express-session');
 
 /************************************************************/
 // Mocha doesn't have a way to designate pending before blocks.
@@ -80,12 +81,14 @@ describe('', function() {
         };
         // login via form and save session info
         requestWithSession(options, function(error, res, body) {
+
           done();
         });
       });
     });
 
     it('Only shortens valid urls, returning a 404 - Not found for invalid urls', function(done) {
+      console.log('mocha test shortens valid urls');
       var options = {
         'method': 'POST',
         'uri': 'http://127.0.0.1:4568/links',
@@ -102,6 +105,7 @@ describe('', function() {
     });
 
     describe('Shortening links:', function() {
+      console.log('mocha test shortens links');
 
       var options = {
         'method': 'POST',
@@ -213,7 +217,7 @@ describe('', function() {
 
   }); // 'Link creation'
 
-  xdescribe('Privileged Access:', function() {
+  describe('Privileged Access:', function() {
 
     it('Redirects to login page if a user tries to access the main page and is not signed in', function(done) {
       request('http://127.0.0.1:4568/', function(error, res, body) {
@@ -229,7 +233,7 @@ describe('', function() {
       });
     });
 
-    it('Redirects to login page if a user tries to see all of the links and is not signed in', function(done) {
+    xit('Redirects to login page if a user tries to see all of the links and is not signed in', function(done) {
       request('http://127.0.0.1:4568/links', function(error, res, body) {
         expect(res.req.path).to.equal('/login');
         done();
@@ -238,7 +242,7 @@ describe('', function() {
 
   }); // 'Priviledged Access'
 
-  xdescribe('Account Creation:', function() {
+  describe('Account Creation:', function() {
 
     it('Signup creates a user record', function(done) {
       var options = {

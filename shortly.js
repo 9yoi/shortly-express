@@ -2,7 +2,7 @@ var express = require('express');
 var util = require('./lib/utility');
 var partials = require('express-partials');
 var bodyParser = require('body-parser');
-
+var session = require('express-session');
 
 var db = require('./app/config');
 var Users = require('./app/collections/users');
@@ -21,31 +21,38 @@ app.use(bodyParser.json());
 // Parse forms (signup/login)
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
+app.use(session({secret: 'boo'}));
 
+var checkUser = function(req, res, next) {
+  if (req.session.active === undefined) {
+    res.redirect('/login');
+  } else {
+    next();
+  }
+};
 
-app.get('/', 
-function(req, res) {
+app.get('/', checkUser, function(req, res) {
   res.render('index');
 });
 
-app.get('/create', 
-function(req, res) {
+app.get('/login', function(req, res) {
+  res.render('login');
+});
+
+app.get('/create', checkUser, function(req, res) {
   res.render('index');
 });
 
-app.get('/links', 
-function(req, res) {
+app.get('/links', function(req, res) {
   Links.reset().fetch().then(function(links) {
     res.status(200).send(links.models);
   });
 });
 
-app.post('/links', 
-function(req, res) {
-  var uri = req.body.url;
+app.post('/links', function(req, res) {
+  var uri = req.body.url; //the url that user types in
 
   if (!util.isValidUrl(uri)) {
-    console.log('Not a valid url: ', uri);
     return res.sendStatus(404);
   }
 
@@ -72,10 +79,10 @@ function(req, res) {
   });
 });
 
+
 /************************************************************/
 // Write your authentication routes here
 /************************************************************/
-
 
 
 /************************************************************/
