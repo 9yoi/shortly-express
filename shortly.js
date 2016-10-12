@@ -25,7 +25,7 @@ app.use(express.static(__dirname + '/public'));
 app.use(session({secret: 'boo'}));
 
 var checkUser = function(req, res, next) {
-  if (req.session.active === undefined) {
+  if (!req.session.active) {
     console.log(req.session);
     res.redirect('/login');
   } else {
@@ -65,6 +65,11 @@ app.get('/links', checkUser, function(req, res) {
 
 app.get('/signup', function(req, res) {
   res.render('signup');
+});
+
+app.get('/logout', function(req, res) {
+  req.session.active = false;
+  res.redirect('/');
 });
 
 app.post('/links', function(req, res) {
