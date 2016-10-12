@@ -31,6 +31,18 @@ var checkUser = function(req, res, next) {
   }
 };
 
+// test to see if password is being saved
+new User({username: 'heyman', password: 'hey'})
+  .save()
+  .then(function(model) {
+    console.log(model);
+    new User({username: 'heyman'})
+      .fetch()
+      .then(function(found) {
+        console.log(found);
+      });
+  });
+  
 app.get('/', checkUser, function(req, res) {
   res.render('index');
 });
