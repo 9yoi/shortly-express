@@ -10,6 +10,7 @@ var User = require('./app/models/user');
 var Links = require('./app/collections/links');
 var Link = require('./app/models/link');
 var Click = require('./app/models/click');
+var bcrypt = require('bcrypt-nodejs');
 
 var app = express();
 
@@ -25,24 +26,25 @@ app.use(session({secret: 'boo'}));
 
 var checkUser = function(req, res, next) {
   if (req.session.active === undefined) {
+    console.log(req.session);
     res.redirect('/login');
   } else {
     next();
   }
 };
 
-// test to see if password is being saved
-new User({username: 'heyman', password: 'hey'})
-  .save()
-  .then(function(model) {
-    console.log(model);
-    new User({username: 'heyman'})
-      .fetch()
-      .then(function(found) {
-        console.log(found);
-      });
-  });
-  
+// // test to see if password is being saved
+// new User({username: 'heyman', password: 'hey'})
+//   .save()
+//   .then(function(model) {
+//     console.log(model);
+//     new User({username: 'heyman'})
+//       .fetch()
+//       .then(function(found) {
+//         console.log(found);
+//       });
+//   });
+
 app.get('/', checkUser, function(req, res) {
   res.render('index');
 });
@@ -116,10 +118,19 @@ app.post('/signup', function(req, res) {
 
 // come back and encrypt later
 app.post('/login', function(req, res) {
-  new User({ username: req.body.username, password: req.body.password}).fetch().then(function(found) {
+
+  new User({ username: req.body.username}).fetch().then(function(found) {
     if (found) {
-      req.session.active = true;
-      res.redirect('/');
+      var hash = found.attributes.password;
+      bcrypt.compare(req.body.password, hash, function (err, correct) {
+        if (correct) {
+          req.session.active = true;
+          res.redirect('/');
+        } else {
+          res.status(301);
+          res.redirect('/login');
+        }
+      });
     } else {
       res.status(301);
       res.redirect('/login');
