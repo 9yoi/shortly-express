@@ -1,2 +1,6 @@
-#shortly-express
-This is a project I completed as a student at [hackreactor](http://hackreactor.com). This project was worked on with a pair.
+Playground: building a link shortener
+
+- authentication (bcrypt)
+- promises (bluebird)
+- sqlite
+- bookshelf
